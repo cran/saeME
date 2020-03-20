@@ -1,0 +1,14 @@
+922becb1a80e0ae7908d5fcb7033980f *DESCRIPTION
+a2ba8b42de60d24593f93ea9be3b18de *NAMESPACE
+2bd60b50c24dca6fccd001617364af08 *R/FHme.R
+6814369bac974d40432a9b18e03739f6 *R/dataME.R
+9669d6fd2cfebf3cad14754fe68877aa *R/datamix.R
+1bd426e9307485cb09398a81414ee8fc *R/mse_FHme.R
+3ad2eece55b983ec236284874a1dba27 *R/saeME.R
+7b42ffefbaea9951fd246b4e879df4a4 *data/dataME.rda
+d78ffb948005c95a2fc3b9a1e73ac0a0 *data/datamix.rda
+8fa7b079dad03e4ece24b5530f2839dd *man/FHme.Rd
+ec222997ec76c2294dbde95880455c62 *man/dataME.Rd
+7cbb34eb9e2b8eef09f6d69a1dd9003a *man/datamix.Rd
+cfb989b082fc00857aafbd2a21a1ddd1 *man/mse_FHme.Rd
+e0fde6ebee8d9320383f5d5823cf83cc *man/saeME-package.Rd
