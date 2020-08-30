@@ -3,13 +3,15 @@
 \name{dataME}
 \alias{dataME}
 \title{dataME}
-\format{A data frame with 100 observations on the following 4 variables.
+\format{
+A data frame with 100 observations on the following 4 variables.
 \describe{
  \item{y}{Direct estimator for each domain.}
  \item{x.hat}{Auxiliary variable for each domain.}
  \item{vardir}{Sampling variances for each domain.}
  \item{var.x}{MSE of auxiliary variable and sorted as \code{x.hat}}
-}}
+}
+}
 \usage{
 data(dataME)
 }

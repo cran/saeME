@@ -3,7 +3,8 @@
 \name{datamix}
 \alias{datamix}
 \title{datamix}
-\format{A data frame with 100 observations on the following 8 variables.
+\format{
+A data frame with 100 observations on the following 8 variables.
 \describe{
  \item{y}{Direct estimator for each domain.}
  \item{x.hat1}{Auxiliary variable (measured with error) for each domain.}
@@ -13,7 +14,8 @@
  \item{vardir}{Sampling variances for each domain.}
  \item{var.x1}{MSE of auxiliary variable and sorted as \code{x.hat1}}
  \item{var.x2}{MSE of auxiliary variable and sorted as \code{x.hat2}}
-}}
+}
+}
 \usage{
 data(datamix)
 }

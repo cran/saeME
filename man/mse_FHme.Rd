@@ -20,6 +20,7 @@ mse_FHme(formula, vardir, var.x, type.x = "witherror", data)
 \value{
 The function returns a list with the following objects:
 \describe{
+   \item{g1}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
    \item{mse}{vector with the values of the mean squared error for each domain.}
  }
 }

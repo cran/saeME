@@ -17,6 +17,7 @@
 #'     \item iterations : number of iterations when calculating estimated beta and estimated random effects.
 #'     \item estcoef : a dataframe with the estimated model coefficient (beta) in the first column, their standard error in the second column, the t statistics in the third column, and the p-values of the significance of each coefficient in the last column.
 #'     \item refvar : a value of estimated random effects.
+#'     \item gamma : vector with values of the estimated gamma for each domains.
 #'     }
 #'  }
 #'
@@ -30,7 +31,6 @@
 #' @export FHme
 FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   namevar <- deparse(substitute(vardir))
-  #name_c <- deparse(substitute(c))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
     stop(" type.x=\"", type.x, "\" must be \"witherror\", \"noerror\" or \"mix\".")
 
@@ -251,7 +251,7 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   betacap_b <- beta_sigma
   t.val <- betacap_b$betacap/se.b
   pv <- 2 * pnorm(abs(t.val), lower.tail = FALSE)
-  coef <- cbind(betacap_b$betacap, se.b, t.val, pv)
+  coef <- data.frame(betacap_b$betacap, se.b, t.val, pv)
   colnames(coef) <- c("beta", "std.error", "t.statistics", "p.value")
   sigma2cap_b <- beta_sigma$sigma2cap
 
@@ -260,7 +260,8 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   result <- list(eblup = NA, fit = list(method = NA, convergence = NA,
                                        iterations = NA,
                                        estcoef =NA,
-                                       refvar = NA))
+                                       refvar = NA,
+                                       gamma = NA))
   result$eblup <- yme
   result$fit$method <- 'REML'
   result$fit$convergence <- beta_sigma$convergence
@@ -270,6 +271,7 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   result$fit$iterations <- beta_sigma$iterations
   result$fit$estcoef <- coef
   result$fit$refvar <- sigma2cap_b
+  result$fit$gamma <- gcap
 
   return(result)
 }

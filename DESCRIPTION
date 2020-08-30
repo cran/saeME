@@ -1,7 +1,7 @@
 Package: saeME
 Title: Small Area Estimation with Measurement Error
 Type: Package
-Version: 1.0.1
+Version: 1.2
 Author: Muhammad Rifqi Mubarak [aut, cre],
   Azka Ubaidillah [aut]
 Maintainer: Muhammad Rifqi Mubarak <16.9304@stis.ac.id>
@@ -9,10 +9,10 @@ Description: A set of functions and datasets implementation of small area estima
 License: GPL-2
 Depends: R (>= 3.1.0)
 Encoding: UTF-8
-Imports: expm, MASS, stats
+Imports: expm, MASS, stats, dplyr
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2020-03-19 17:22:32 UTC; Rifqi Mubarak
+Packaged: 2020-08-30 14:05:46 UTC; Rifqi Mubarak
 Repository: CRAN
-Date/Publication: 2020-03-20 10:10:05 UTC
+Date/Publication: 2020-08-30 14:30:06 UTC

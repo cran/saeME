@@ -28,6 +28,7 @@ The function returns a list with the following objects:
     \item iterations : number of iterations when calculating estimated beta and estimated random effects.
     \item estcoef : a dataframe with the estimated model coefficient (beta) in the first column, their standard error in the second column, the t statistics in the third column, and the p-values of the significance of each coefficient in the last column.
     \item refvar : a value of estimated random effects.
+    \item gamma : vector with values of the estimated gamma for each domains.
     }
  }
 }
