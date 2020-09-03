@@ -3,14 +3,16 @@
 #' @param formula an object of class \code{\link[stats]{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The variables included  \code{formula} must have a length equal to the number of domains \code{m}. This formula can provide auxiliary variable either measured with error or without error or combination between them. If the auxiliary variable are combination between \code{noerror} and \code{witherror} variable, input all \code{witherror} variable first then \code{noerror} variable.
 #' @param vardir vector containing the \code{m} sampling variances of direct estimators for each domain. The values must be sorted as the \code{Y}.
 #' @param var.x vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. if you use optional \code{data}, input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.
+#' @param MAXITER maximum number of iterations allowed. Default value is \code{1000} iterations.
+#' @param PRECISION convergence tolerance limit. Default value is \code{0.0001}.
 #' @param type.x type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.
 #' @param data optional data frame containing the variables named in formula, vardir, and var.x.
 #' @details A formula has an implied intercept term. To remove this use either y ~ x - 1 or y ~ 0 + x. See \code{\link[stats]{formula}}  for more details of allowed formulae.
 #'
 #' @return The function returns a list with the following objects:
 #' \describe{
-#'    \item{g1}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-#'    \item{mse}{vector with the values of the mean squared error for each domain.}
+#'    \item{\code{g1}}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
+#'    \item{\code{mse}}{vector with the values of the mean squared errors of the EBLUPs for each domain.}
 #'  }
 #'
 #' @examples
@@ -22,7 +24,7 @@
 #'                 vardir = vardir, var.x = c("var.x1", "var.x2"), type.x = "mix", data = datamix)
 #' }
 #' @export mse_FHme
-mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
+mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", MAXITER = 1000, PRECISION = 0.0001, data) {
   namevar <- deparse(substitute(vardir))
   #name_c <- deparse(substitute(c))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
@@ -62,7 +64,7 @@ mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   m <- length(y)
   p <- dim(X_cap)[2]
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c)
+  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c,MAXITER,PRECISION)
   betacap_b <- beta_sigma
   sigma2cap_b <- beta_sigma$sigma2cap
   gcap <- gammacap(y,X_cap,betacap_b,sigma2cap_b,c,psi)
@@ -70,14 +72,14 @@ mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
   yME <- list("y_me" = yme,
               "gamma" = gcap)
 
-  jackknife <- function(y,X_cap,psi,c,j, w = rep(1,length(y))) {
+  jackknife <- function(y,X_cap,psi,c,j, MAXITER, PRECISION, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
-    R_sigma <- 0.001
-    R_beta <- as.matrix(rep(0.001,p))
-    max_iter <- 100
+    R_sigma <- PRECISION
+    R_beta <- as.matrix(rep(PRECISION,p))
+    max_iter <- MAXITER
     betacap_b <- 0
     sigma2cap_b <- 0
     k <- 0
@@ -122,9 +124,7 @@ mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
                    'beta' = betacap_b)
     return(result)
   }
-
-  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j))
-
+  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j, MAXITER, PRECISION))
   m1cap <- sapply(1:m, function(i)
   {
     left <- yME$gamma[i]*psi[i]
@@ -257,14 +257,14 @@ y_me <- function(y,X_cap,betacap_i,gammacap) {
   })
   return(yme)
 }
-beta_sigma_conv <- function(y,X_cap,psi,c, w = rep(1,length(y))) {
+beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
   m <- length(y)
   p <- dim(X_cap)[2]
   sigma2cap_b <- 0
   betacap_b <- 0
-  R_sigma <- 0.001
-  R_beta <- as.matrix(rep(0.001,p))
-  max_iter <- 1000
+  R_sigma <- PRECISION
+  R_beta <- as.matrix(rep(PRECISION,p))
+  max_iter <- MAXITER
   k <- 0
   diff_beta <- as.matrix(rep(1,p))
   diff_sigma <- 1

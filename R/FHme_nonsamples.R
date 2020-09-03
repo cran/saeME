@@ -2,22 +2,32 @@
 #' @description This function gives the EBLUP estimator of nonsampled area using cluster information.
 #' @param formula an object of class \code{\link[stats]{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The variables included  \code{formula} must have a length equal to the number of domains \code{m}. This formula can provide auxiliary variable either measured with error or without error or combination between them. If the auxiliary variable are combination between \code{noerror} and \code{witherror} variable, input all \code{witherror} variable first then \code{noerror} variable.
 #' @param vardir vector containing the \code{m} sampling variances of direct estimators for each domain. The values must be sorted as the \code{Y}.
-#' @param var.x vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. if you use optional \code{data}, input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.
+#' @param var.x vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. Input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.
+#' @param MAXITER maximum number of iterations allowed. Default value is \code{1000} iterations.
+#' @param PRECISION convergence tolerance limit. Default value is \code{0.0001}.
 #' @param type.x type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.
 #' @param n.cluster either the number of clusters, say \code{k}, or a set of initial (distinct) cluster centers.
-#' @param data data frame containing the variables named in formula, vardir, and var.x.
+#' @param data a data frame containing the variables named in formula, vardir, and var.x.
 #' @details A formula has an implied intercept term. To remove this use either y ~ x - 1 or y ~ 0 + x. See \code{\link[stats]{formula}}  for more details of allowed formulae.
 #'
 #' @return The function returns a list with the following objects:
 #' \describe{
-#'    \item{sampled_data}{data frame of nonsampled area containing cluster information and mean of random effect for each cluster.}
-#'    \item{nonsampled_data}{data frame of sampled area containing cluster information and mean of random effect for each cluster.}
-#'    \item{full_data}{data frame of observed area containing cluster information and mean of random effect for each cluster.}
-#'    \item{result_sampled}{a list containing result of small area estimation for sampled area, containing following objects: \code{eblup}, \code{fit}, and \code{ref} values of the random effect for each area.}
-#'    \item{result_nonsampled}{a list containing result of small area estimation for nonsampled area, containing following objects: \code{eblup} and \code{estcoef}.}
-#'    \item{mse_sample}{a list containing mean squared error of sampled area and the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-#'    \item{mse_nonsample}{a list containing mean squared error of nonsampled area and the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-#'    \item{cluster}{data frame containing cluster information and mean of random effect for each cluster.}
+#'    \item{\code{nonsampled_data}}{a data frame of nonsampled areas containing \code{data}, the cluster information (\code{cluster}) and mean of random effect for each cluster (\code{refmean}).}
+#'    \item{\code{sampled_data}}{a data frame of sampled areas containing \code{data}, the cluster information (\code{cluster}) and mean of random effect for each cluster (\code{refmean}).}
+#'    \item{\code{result_sampled}}{a list containing following objects:}
+#'    \itemize{
+#'     \item \code{eblup}: vector with the values of the estimators for the sampled areas.
+#'     \item \code{fit}: a list of \code{method}, \code{convergence}, \code{iterations}, \code{estcoef}, \code{refvar}, and \code{gamma}. For the description of these objects, see Value of \link{FHme} function.
+#'     \item \code{ref}: values of the random effect for each area.
+#'    }
+#'    \item{\code{result_nonsampled}}{a list containing following objects:}
+#'    \itemize{
+#'     \item \code{eblup}: vector with the values of the estimators for the nonsampled areas.
+#'     \item \code{estcoef}: a data frame with the estimated model coefficient (\code{beta}) in the first column, their standard error (\code{std.error}) in the second column, the t-statistics (\code{t.statistics}) in the third column, and the p-values of the significance of each coefficient (\code{pvalue}) in the last column.
+#'    }
+#'    \item{\code{mse_sample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+#'    \item{\code{mse_nonsample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+#'    \item{\code{cluster}}{a data frame with the cluster information (\code{cluster}) in the first column and mean of random effects for each cluster (\code{refmean}) in the second column.}
 #'  }
 #' @examples
 #' \donttest{
@@ -27,7 +37,7 @@
 #' }
 #'
 #' @export FHme_nonsamples
-FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", n.cluster, data){
+FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITER = 1000, PRECISION = 0.0001, n.cluster, data){
   formuladata <- model.frame(formula, na.action = NULL, data)
   y <- names(formuladata)[1]
   auxiliary <- formuladata[,-1]
@@ -49,11 +59,11 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", n.clus
 
 
   zero_tmp <- zero
-  zero_tmp[,1] <- rnorm(nrow(zero_tmp), mean = 2, sd = 0.1)
+  zero_tmp[,y] <- rnorm(nrow(zero_tmp), mean = 2, sd = 0.1)
   aux_zero <- model.matrix(formula, data = zero_tmp)
 
   estimated_full <- FHme_edit(formula = formula.a, var.x = var.xa, vardir = vardir,
-                              type.x = type.xa, data = used_full)
+                              type.x = type.xa, MAXITER, PRECISION, data = used_full)
   ref <- estimated_full$ref
   gamma <- estimated_full$fit$gamma
   g1 <- sapply(1:nrow(full), function(i){
@@ -78,10 +88,10 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", n.clus
     return(cal)
   })
   EBLUP_zero <- data.frame(EBLUP_zero)
-
   g1_zero <- calculate$g1mean
   g1_zero <- data.frame(g1_zero)
-  jk <- lapply(1:nrow(full), function(j) jackknife(full[,y_full],aux_full,full[,vardir],full[,var.xa],j, type.x = type.xa))
+  jk <- lapply(1:nrow(full), function(j) jackknife(full[,y_full],aux_full,full[,vardir],full[,var.xa],j,
+                                                   type.x = type.xa, MAXITER, PRECISION))
   g1_jack <- lapply(1:nrow(full_r), function(i){
     g1 <- sapply(1:nrow(full_r), function(j){
       return(full_r[,vardir][i] * jk[[i]]$result$gamma[j])
@@ -126,23 +136,22 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", n.clus
     return(m2)
   })
 
-  mse_sample <- mse_FHme_e(formula = formula.a, vardir = vardir, var.x = var.xa, type.x = type.xa,
-                         data = full)
-
+  mse_sample <- mse_FHme_e(formula = formula.a, vardir = vardir, var.x = var.xa,
+                           type.x = type.xa, MAXITER, PRECISION, data = full)
   msenonsample <- m1cap + m2cap
-  mse_nonsample <- list("g1" = g1_zero,
+  mse_nonsample <- list("g1" = g1_zero[,1],
                         "mse" = msenonsample)
 
   result_nonsampled <- list("eblup" = NA, "estcoef" = NA)
-  result_nonsampled$eblup <- EBLUP_zero
+  result_nonsampled$eblup <- EBLUP_zero[,1]
   result_nonsampled$estcoef <- estimated_full$fit$estcoef
   zero_r <- zero_r[,-ncol(zero_r)]
   full_r <- full_r[,-ncol(full_r)]
+  byCluster <- byCluster[, -ncol(byCluster)]
   full_data <- left_join(data_cluster, byCluster, by = "cluster")
 
   result <- list("nonsampled_data" = zero_r,
                  "sampled_data" = full_r,
-                 "full_data" = full_data[,-ncol(full_data)],
                  "result_sampled" = estimated_full,
                  "result_nonsampled" = result_nonsampled,
                  "mse_sample" = mse_sample,
@@ -151,7 +160,7 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", n.clus
 
   return(result)
 }
-jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", w = rep(1,length(y))) {
+jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", MAXITER, PRECISION, w = rep(1,length(y))) {
   m <- length(y)
   p <- dim(X_cap)[2]
   if(type.x == "witherror"){
@@ -167,9 +176,9 @@ jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", w = rep(1,length(y)
 
   diff_beta <- as.matrix(rep(1,p))
   diff_sigma <- 1
-  R_sigma <- 0.001
-  R_beta <- as.matrix(rep(0.001,p))
-  max_iter <- 100
+  R_sigma <- PRECISION
+  R_beta <- as.matrix(rep(PRECISION,p))
+  max_iter <- MAXITER
   betacap_b <- 0
   sigma2cap_b <- 0
   k <- 0
@@ -325,7 +334,7 @@ jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", w = rep(1,length(y)
                  'beta' = betacap_b)
   return(result)
 }
-mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
+mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PRECISION, data) {
   #namevar <- deparse(substitute(vardir))
   #name_c <- deparse(substitute(c))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
@@ -460,14 +469,14 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
     })
     return(gammacap)
   }
-  beta_sigma_conv <- function(y,X_cap,psi,c, w = rep(1,length(y))) {
+  beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     sigma2cap_b <- 0
     betacap_b <- 0
-    R_sigma <- 0.001
-    R_beta <- as.matrix(rep(0.001,p))
-    max_iter <- 1000
+    R_sigma <- PRECISION
+    R_beta <- as.matrix(rep(PRECISION,p))
+    max_iter <- MAXITER
     k <- 0
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
@@ -518,7 +527,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
     return(beta_sigma)
   }
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c)
+  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c, MAXITER, PRECISION)
   betacap_b <- beta_sigma
   sigma2cap_b <- beta_sigma$sigma2cap
   gcap <- gammacap(y,X_cap,betacap_b,sigma2cap_b,c,psi)
@@ -537,14 +546,14 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
   yME <- list("y_me" = yme,
               "gamma" = gcap)
 
-  jackknife <- function(y,X_cap,psi,c,j, w = rep(1,length(y))) {
+  jackknife <- function(y,X_cap,psi,c,j, MAXITER, PRECISION, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
-    R_sigma <- 0.001
-    R_beta <- as.matrix(rep(0.001,p))
-    max_iter <- 100
+    R_sigma <- PRECISION
+    R_beta <- as.matrix(rep(PRECISION,p))
+    max_iter <- MAXITER
     betacap_b <- 0
     sigma2cap_b <- 0
     k <- 0
@@ -589,9 +598,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
                    'beta' = betacap_b)
     return(result)
   }
-
-  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j))
-
+  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j, MAXITER, PRECISION))
   m1cap <- sapply(1:m, function(i)
   {
     left <- yME$gamma[i]*psi[i]
@@ -618,7 +625,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
   return(list("g1" = g1,
               "mse" = mse))
 }
-FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", data) {
+FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PRECISION, data) {
   #namevar <- deparse(substitute(vardir))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
     stop(" type.x=\"", type.x, "\" must be \"witherror\", \"noerror\" or \"mix\".")
@@ -755,15 +762,14 @@ FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", data) {
 
     return(sigma2cap)
   }
-
-  beta_sigma_conv <- function(y,X_cap,psi,c, w = rep(1,length(y))) {
+  beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     sigma2cap_b <- 0
     betacap_b <- 0
-    R_sigma <- 0.001
-    R_beta <- as.matrix(rep(0.001,p))
-    max_iter <- 1000
+    R_sigma <- PRECISION
+    R_beta <- as.matrix(rep(PRECISION,p))
+    max_iter <- MAXITER
     k <- 0
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
@@ -813,7 +819,6 @@ FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", data) {
                        "iterations" = k)
     return(beta_sigma)
   }
-
   gammacap <- function(y,X_cap,betacap_i,sigma2cap,c,psi) {
     m <- length(y)
     p <- dim(X_cap)[2]
@@ -839,7 +844,7 @@ FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", data) {
     return(sum_up)
   }
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c)
+  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c, MAXITER, PRECISION)
   se.b <- sqrt(diag(beta_sigma$Q_matrix))
   betacap_b <- beta_sigma
   t.val <- betacap_b$betacap/se.b
@@ -856,7 +861,7 @@ FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", data) {
                                         estcoef =NA,
                                         refvar = NA,
                                         gamma = NA))
-  result$eblup <- data.frame(yme)
+  result$eblup <- yme
   result$ref <- ref
   result$fit$method <- 'REML'
   result$fit$convergence <- beta_sigma$convergence

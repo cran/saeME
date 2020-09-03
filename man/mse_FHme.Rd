@@ -4,7 +4,15 @@
 \alias{mse_FHme}
 \title{Mean Squared Error Estimator of the EBLUP under a Fay-Herriot Model with Measurement Error}
 \usage{
-mse_FHme(formula, vardir, var.x, type.x = "witherror", data)
+mse_FHme(
+  formula,
+  vardir,
+  var.x,
+  type.x = "witherror",
+  MAXITER = 1000,
+  PRECISION = 1e-04,
+  data
+)
 }
 \arguments{
 \item{formula}{an object of class \code{\link[stats]{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The variables included  \code{formula} must have a length equal to the number of domains \code{m}. This formula can provide auxiliary variable either measured with error or without error or combination between them. If the auxiliary variable are combination between \code{noerror} and \code{witherror} variable, input all \code{witherror} variable first then \code{noerror} variable.}
@@ -15,13 +23,17 @@ mse_FHme(formula, vardir, var.x, type.x = "witherror", data)
 
 \item{type.x}{type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.}
 
+\item{MAXITER}{maximum number of iterations allowed. Default value is \code{1000} iterations.}
+
+\item{PRECISION}{convergence tolerance limit. Default value is \code{0.0001}.}
+
 \item{data}{optional data frame containing the variables named in formula, vardir, and var.x.}
 }
 \value{
 The function returns a list with the following objects:
 \describe{
-   \item{g1}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-   \item{mse}{vector with the values of the mean squared error for each domain.}
+   \item{\code{g1}}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
+   \item{\code{mse}}{vector with the values of the mean squared errors of the EBLUPs for each domain.}
  }
 }
 \description{

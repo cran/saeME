@@ -4,32 +4,53 @@
 \alias{FHme_nonsamples}
 \title{Fay-Herriot Model with Measurement Error of Nonsampled Area}
 \usage{
-FHme_nonsamples(formula, var.x, vardir, type.x = "witherror", n.cluster, data)
+FHme_nonsamples(
+  formula,
+  var.x,
+  vardir,
+  type.x = "witherror",
+  MAXITER = 1000,
+  PRECISION = 1e-04,
+  n.cluster,
+  data
+)
 }
 \arguments{
 \item{formula}{an object of class \code{\link[stats]{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The variables included  \code{formula} must have a length equal to the number of domains \code{m}. This formula can provide auxiliary variable either measured with error or without error or combination between them. If the auxiliary variable are combination between \code{noerror} and \code{witherror} variable, input all \code{witherror} variable first then \code{noerror} variable.}
 
-\item{var.x}{vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. if you use optional \code{data}, input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.}
+\item{var.x}{vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. Input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.}
 
 \item{vardir}{vector containing the \code{m} sampling variances of direct estimators for each domain. The values must be sorted as the \code{Y}.}
 
 \item{type.x}{type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.}
 
+\item{MAXITER}{maximum number of iterations allowed. Default value is \code{1000} iterations.}
+
+\item{PRECISION}{convergence tolerance limit. Default value is \code{0.0001}.}
+
 \item{n.cluster}{either the number of clusters, say \code{k}, or a set of initial (distinct) cluster centers.}
 
-\item{data}{data frame containing the variables named in formula, vardir, and var.x.}
+\item{data}{a data frame containing the variables named in formula, vardir, and var.x.}
 }
 \value{
 The function returns a list with the following objects:
 \describe{
-   \item{sampled_data}{data frame of nonsampled area containing cluster information and mean of random effect for each cluster.}
-   \item{nonsampled_data}{data frame of sampled area containing cluster information and mean of random effect for each cluster.}
-   \item{full_data}{data frame of observed area containing cluster information and mean of random effect for each cluster.}
-   \item{result_sampled}{a list containing result of small area estimation for sampled area, containing following objects: \code{eblup}, \code{fit}, and \code{ref} values of the random effect for each area.}
-   \item{result_nonsampled}{a list containing result of small area estimation for nonsampled area, containing following objects: \code{eblup} and \code{estcoef}.}
-   \item{mse_sample}{a list containing mean squared error of sampled area and the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-   \item{mse_nonsample}{a list containing mean squared error of nonsampled area and the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
-   \item{cluster}{data frame containing cluster information and mean of random effect for each cluster.}
+   \item{\code{nonsampled_data}}{a data frame of nonsampled areas containing \code{data}, the cluster information (\code{cluster}) and mean of random effect for each cluster (\code{refmean}).}
+   \item{\code{sampled_data}}{a data frame of sampled areas containing \code{data}, the cluster information (\code{cluster}) and mean of random effect for each cluster (\code{refmean}).}
+   \item{\code{result_sampled}}{a list containing following objects:}
+   \itemize{
+    \item \code{eblup}: vector with the values of the estimators for the sampled areas.
+    \item \code{fit}: a list of \code{method}, \code{convergence}, \code{iterations}, \code{estcoef}, \code{refvar}, and \code{gamma}. For the description of these objects, see Value of \link{FHme} function.
+    \item \code{ref}: values of the random effect for each area.
+   }
+   \item{\code{result_nonsampled}}{a list containing following objects:}
+   \itemize{
+    \item \code{eblup}: vector with the values of the estimators for the nonsampled areas.
+    \item \code{estcoef}: a data frame with the estimated model coefficient (\code{beta}) in the first column, their standard error (\code{std.error}) in the second column, the t-statistics (\code{t.statistics}) in the third column, and the p-values of the significance of each coefficient (\code{pvalue}) in the last column.
+   }
+   \item{\code{mse_sample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+   \item{\code{mse_nonsample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+   \item{\code{cluster}}{a data frame with the cluster information (\code{cluster}) in the first column and mean of random effects for each cluster (\code{refmean}) in the second column.}
  }
 }
 \description{

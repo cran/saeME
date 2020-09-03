@@ -3,24 +3,26 @@
 #' @param formula an object of class \code{\link[stats]{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The variables included \code{formula} must have a length equal to the number of domains \code{m}. This formula can provide auxiliary variable either measured with error or without error or combination between them. If the auxiliary variable are combination between \code{noerror} and \code{witherror} variable, input all \code{witherror} variable first then \code{noerror} variable.
 #' @param vardir vector containing the \code{m} sampling variances of direct estimators for each domain. The values must be sorted as the \code{Y}.
 #' @param var.x vector containing mean squared error of \code{X} . The values must be sorted as the \code{X}. if you use optional \code{data}, input this parameter use \code{c("")}, example: \code{var.x = c("c1") or var.x = c("c1","c2")}.
+#' @param MAXITER maximum number of iterations allowed. Default value is \code{1000} iterations.
+#' @param PRECISION convergence tolerance limit. Default value is \code{0.0001}.
 #' @param type.x type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.
 #' @param data optional data frame containing the variables named in formula, vardir, and var.x.
 #' @details A formula has an implied intercept term. To remove this use either y ~ x - 1 or y ~ 0 + x. See \code{\link[stats]{formula}}  for more details of allowed formulae.
 #'
 #' @return The function returns a list with the following objects:
 #' \describe{
-#'    \item{eblup}{vector with the values of the estimators for the domains.}
-#'    \item{fit}{a list containing the following objects:}
+#'    \item{\code{eblup}}{vector with the values of the estimators for the domains.}
+#'    \item{\code{fit}}{a list containing the following objects:}
 #'    \itemize{
-#'     \item method : type of fitting method.
-#'     \item convergence : a logical value of convergence when calculating estimated beta and estimated random effects.
-#'     \item iterations : number of iterations when calculating estimated beta and estimated random effects.
-#'     \item estcoef : a dataframe with the estimated model coefficient (beta) in the first column, their standard error in the second column, the t statistics in the third column, and the p-values of the significance of each coefficient in the last column.
-#'     \item refvar : a value of estimated random effects.
-#'     \item gamma : vector with values of the estimated gamma for each domains.
+#'     \item \code{method} : type of fitting method.
+#'     \item \code{convergence} : a logical value of convergence when calculating estimated beta and estimated random effects.
+#'     \item \code{iterations} : number of iterations when calculating estimated beta and estimated random effects.
+#'     \item \code{estcoef} : a data frame with the estimated model coefficient (\code{beta}) in the first column, their standard error (\code{std.error}) in the second column, the t-statistics (\code{t.statistics}) in the third column, and the p-values of the significance of each coefficient (\code{pvalue}) in the last column.
+#'     \item \code{refvar} : a value of estimated random effects.
+#'     \item \code{gamma} : vector with values of the estimated gamma for each domains.
 #'     }
 #'  }
-#'
+#' @seealso \code{\link{mse_FHme}}
 #' @examples
 #' data(dataME)
 #' data(datamix)
@@ -29,7 +31,7 @@
 #'             vardir = vardir, var.x = c("var.x1", "var.x2"), type.x = "mix", data = datamix)
 #'
 #' @export FHme
-FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
+FHme <- function(formula, vardir, var.x, type.x = "witherror", MAXITER = 1000, PRECISION = 0.0001, data) {
   namevar <- deparse(substitute(vardir))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
     stop(" type.x=\"", type.x, "\" must be \"witherror\", \"noerror\" or \"mix\".")
@@ -166,15 +168,14 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
 
     return(sigma2cap)
   }
-
-  beta_sigma_conv <- function(y,X_cap,psi,c, w = rep(1,length(y))) {
+  beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     sigma2cap_b <- 0
     betacap_b <- 0
-    R_sigma <- 0.001
-    R_beta <- as.matrix(rep(0.001,p))
-    max_iter <- 1000
+    R_sigma <- PRECISION
+    R_beta <- as.matrix(rep(PRECISION,p))
+    max_iter <- MAXITER
     k <- 0
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
@@ -224,7 +225,6 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
                        "iterations" = k)
     return(beta_sigma)
   }
-
   gammacap <- function(y,X_cap,betacap_i,sigma2cap,c,psi) {
     m <- length(y)
     p <- dim(X_cap)[2]
@@ -246,7 +246,7 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", data) {
     return(yme)
   }
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c)
+  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c, MAXITER, PRECISION)
   se.b <- sqrt(diag(beta_sigma$Q_matrix))
   betacap_b <- beta_sigma
   t.val <- betacap_b$betacap/se.b

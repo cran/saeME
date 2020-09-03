@@ -6,14 +6,15 @@
 #'   \item Generate \eqn{\hat{x}_{i}}{x.hati} = \eqn{x_{i}}{xi} + \eqn{u_{i}}{ui}.
 #'   \item Then for each iteration, we generated \eqn{Y_{i}}{Yi} = \eqn{2 + 0.5 \hat{x}_{i} + v_{i}}{2 + 0.5*x.hati + vi} and \eqn{y_{i}}{yi} = \eqn{Y_{i} + e_{i}}{Yi + ei}.
 #' }
-#' Direct estimator \code{y}, auxiliary variable \eqn{\hat{x}}{x.hat}, sampling variance \eqn{\psi}{\psi}, and  \eqn{c}{c} are arranged in a dataframe called dataME.
+#' Direct estimator \code{y}, auxiliary variable \eqn{\hat{x}}{x.hat}, sampling variance \eqn{\psi}{\psi}, and  \eqn{c}{c} are arranged in a dataframe called \code{dataME}.
 #' @usage data(dataME)
 #' @format A data frame with 100 observations on the following 4 variables.
 #' \describe{
-#'  \item{y}{Direct estimator for each domain.}
-#'  \item{x.hat}{Auxiliary variable for each domain.}
-#'  \item{vardir}{Sampling variances for each domain.}
-#'  \item{var.x}{MSE of auxiliary variable and sorted as \code{x.hat}}
+#'  \item{\code{small_area}}{areas of interest.}
+#'  \item{\code{y}}{direct estimator for each domain.}
+#'  \item{\code{x.hat}}{auxiliary variable for each domain.}
+#'  \item{\code{vardir}}{sampling variances for each domain.}
+#'  \item{\code{var.x}}{mean squared error of auxiliary variable and sorted as \code{x.hat}}
 #' }
 #' @name dataME
 NULL

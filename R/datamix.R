@@ -8,18 +8,19 @@
 #'   \item Then for each iteration, we generated \eqn{Y_{i}}{Yi} = \eqn{2 + 0.5 \hat{x}_{1i} + 0.5 \hat{x}_{2i} + 2 x_{3i} + 0.5 x_{4i} + v_{i}}{2 + 0.5*x.hat1i + 0.5*x.hat2 i + 2*x3i + 0.5*x4i + vi} and \eqn{y_{i}}{yi} = \eqn{Y_{i} + e_{i}}{Yi + ei}.
 #' }
 #' This data contain combination between auxiliary variable measured with error and without error.
-#' Direct estimator \code{y}, auxiliary variable \eqn{\hat{x}_{1}}{x.hat1} \eqn{\hat{x}_{2}}{x.hat2} \eqn{x_{3}}{x3} \eqn{x_{4}}{x4}, sampling variance \eqn{\psi}{\psi}, and \eqn{c_{1} c_{2}}{c1 c2} are arranged in a dataframe called datamix.
+#' Direct estimator \code{y}, auxiliary variable \eqn{\hat{x}_{1}}{x.hat1} \eqn{\hat{x}_{2}}{x.hat2} \eqn{x_{3}}{x3} \eqn{x_{4}}{x4}, sampling variance \eqn{\psi}{\psi}, and \eqn{c_{1} c_{2}}{c1 c2} are arranged in a dataframe called \code{datamix}.
 #' @usage data(datamix)
 #' @format A data frame with 100 observations on the following 8 variables.
 #' \describe{
-#'  \item{y}{Direct estimator for each domain.}
-#'  \item{x.hat1}{Auxiliary variable (measured with error) for each domain.}
-#'  \item{x.hat2}{Auxiliary variable (measured with error) for each domain.}
-#'  \item{x3}{Auxiliary Variable (measured without error) for each domain.}
-#'  \item{x4}{Auxiliary Variable (measured without error) for each domain.}
-#'  \item{vardir}{Sampling variances for each domain.}
-#'  \item{var.x1}{MSE of auxiliary variable and sorted as \code{x.hat1}}
-#'  \item{var.x2}{MSE of auxiliary variable and sorted as \code{x.hat2}}
+#'  \item{\code{small_area}}{areas of interest.}
+#'  \item{\code{y}}{direct estimator for each domain.}
+#'  \item{\code{x.hat1}}{auxiliary variable (measured with error) for each domain.}
+#'  \item{\code{x.hat2}}{auxiliary variable (measured with error) for each domain.}
+#'  \item{\code{x3}}{auxiliary variable (measured without error) for each domain.}
+#'  \item{\code{x4}}{auxiliary variable (measured without error) for each domain.}
+#'  \item{\code{vardir}}{sampling variances for each domain.}
+#'  \item{\code{var.x1}}{mean squared error of auxiliary variable and sorted as \code{x.hat1}}
+#'  \item{\code{var.x2}}{mean squared error of auxiliary variable and sorted as \code{x.hat2}}
 #' }
 #' @name datamix
 NULL
