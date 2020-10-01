@@ -25,8 +25,8 @@
 #'     \item \code{eblup}: vector with the values of the estimators for the nonsampled areas.
 #'     \item \code{estcoef}: a data frame with the estimated model coefficient (\code{beta}) in the first column, their standard error (\code{std.error}) in the second column, the t-statistics (\code{t.statistics}) in the third column, and the p-values of the significance of each coefficient (\code{pvalue}) in the last column.
 #'    }
-#'    \item{\code{mse_sample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
-#'    \item{\code{mse_nonsample}}{a list containing the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990) and \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+#'    \item{\code{mse_sample}}{a list containing the values of \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the sampled areas.}
+#'    \item{\code{mse_nonsample}}{a list containing the values of \code{mse} a vector with the estimated mean squared errors of the EBLUPs for the nonsampled areas.}
 #'    \item{\code{cluster}}{a data frame with the cluster information (\code{cluster}) in the first column and mean of random effects for each cluster (\code{refmean}) in the second column.}
 #'  }
 #' @examples
@@ -139,8 +139,7 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITE
   mse_sample <- mse_FHme_e(formula = formula.a, vardir = vardir, var.x = var.xa,
                            type.x = type.xa, MAXITER, PRECISION, data = full)
   msenonsample <- m1cap + m2cap
-  mse_nonsample <- list("g1" = g1_zero[,1],
-                        "mse" = msenonsample)
+  mse_nonsample <- list("mse" = msenonsample)
 
   result_nonsampled <- list("eblup" = NA, "estcoef" = NA)
   result_nonsampled$eblup <- EBLUP_zero[,1]
@@ -622,8 +621,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PR
   g1 <- sapply(1:m, function(i){
     return(yME$gamma[i]*psi[i])
   })
-  return(list("g1" = g1,
-              "mse" = mse))
+  return(list("mse" = mse))
 }
 FHme_edit <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PRECISION, data) {
   #namevar <- deparse(substitute(vardir))

@@ -11,7 +11,6 @@
 #'
 #' @return The function returns a list with the following objects:
 #' \describe{
-#'    \item{\code{g1}}{vector with the values of \code{g1}, referring to \code{g1} in MSE by Prasad-Rao (1990).}
 #'    \item{\code{mse}}{vector with the values of the mean squared errors of the EBLUPs for each domain.}
 #'  }
 #'
@@ -148,8 +147,7 @@ mse_FHme <- function(formula, vardir, var.x, type.x = "witherror", MAXITER = 100
   g1 <- sapply(1:m, function(i){
     return(yME$gamma[i]*psi[i])
   })
-  return(list("g1" = g1,
-              "mse" = mse))
+  return(list("mse" = mse))
 }
 
 betacap <- function(y,X_cap,c,w) {
