@@ -1,7 +1,7 @@
 Package: saeME
 Title: Small Area Estimation with Measurement Error
 Type: Package
-Version: 1.2.2
+Version: 1.2.3
 Author: Muhammad Rifqi Mubarak [aut, cre],
   Azka Ubaidillah [aut]
 Maintainer: Muhammad Rifqi Mubarak <16.9304@stis.ac.id>
@@ -13,6 +13,6 @@ Imports: expm, MASS, stats, dplyr
 LazyData: true
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2020-10-01 02:45:09 UTC; Rifqi Mubarak
+Packaged: 2020-10-12 11:54:56 UTC; Rifqi Mubarak
 Repository: CRAN
-Date/Publication: 2020-10-01 05:10:02 UTC
+Date/Publication: 2020-10-12 12:40:03 UTC

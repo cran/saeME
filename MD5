@@ -1,10 +1,10 @@
-aacccb71018bcc6cbf2b428596c588c3 *DESCRIPTION
+694cd3867cd9c1c4e8055625b84935e5 *DESCRIPTION
 8ab8990bfb38f75d561e82a756a595f7 *NAMESPACE
 8b0946a954e3993868e7470c59405da5 *R/FHme.R
-1bf9e68f83c0c3886a28e31b474d5e8f *R/FHme_nonsamples.R
+3b0dc18dda8856b16bfe398d4f533018 *R/FHme_nonsamples.R
 89efde2cabb1bea2498c5925da6d8080 *R/dataME.R
 97b5c57de701eff21b9e889843953835 *R/datamix.R
-1674a9adf17f27dfbb471165a4dab06b *R/mse_FHme.R
+1c0711de0091ad4675568bd317810cb5 *R/mse_FHme.R
 9a7c10e2104025fd211f4eb97b495408 *R/nonsample.R
 d4da2931d955d70ecb3c7f2527587d1f *R/saeME.R
 1e8efe0caadc5aa9ece09d83435f8a31 *README.md
@@ -12,9 +12,9 @@ d4da2931d955d70ecb3c7f2527587d1f *R/saeME.R
 739ecd95bada0309f1d288f4acc94910 *data/datamix.rda
 e3259f63cc3398e1de5490fd4bfc30c9 *data/nonsample.rda
 d5e808fd4ef5f7df0370e73518be3cab *man/FHme.Rd
-c17b33743c9c84250ce5af8c4d71a316 *man/FHme_nonsamples.Rd
+313ac5e01e99fed89018b33b0522e88f *man/FHme_nonsamples.Rd
 43d6bcbd55d26fb36391067169e4c5c0 *man/dataME.Rd
 a9b29e1206dadc26a349149eb35d2ce8 *man/datamix.Rd
-54fa83288aa41a351ea7097a07448388 *man/mse_FHme.Rd
+e2ae32ec99cc0fa0ab1fcba1ea6556c6 *man/mse_FHme.Rd
 f524010e375d2ab373805c617476b1be *man/nonsample.Rd
 795a277e26ff203256e6d218166163c4 *man/saeME.Rd

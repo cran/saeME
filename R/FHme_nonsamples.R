@@ -37,13 +37,16 @@
 #' }
 #'
 #' @export FHme_nonsamples
-FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITER = 1000, PRECISION = 0.0001, n.cluster, data){
+FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITER = 100, PRECISION = 0.0001, n.cluster, data){
   formuladata <- model.frame(formula, na.action = NULL, data)
   y <- names(formuladata)[1]
   auxiliary <- formuladata[,-1]
   formula.a <- formula
   var.xa <- var.x
   vardir <- deparse(substitute(vardir))
+  if(type.x == "witherror"){
+    var.xa <- vardir
+  }
   type.xa <- type.x
 
   get_cluster <- as.matrix(kmeans(auxiliary, n.cluster)$cluster)
@@ -91,7 +94,7 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITE
   g1_zero <- calculate$g1mean
   g1_zero <- data.frame(g1_zero)
   jk <- lapply(1:nrow(full), function(j) jackknife(full[,y_full],aux_full,full[,vardir],full[,var.xa],j,
-                                                   type.x = type.xa, MAXITER, PRECISION))
+                                                   type.x = type.xa))
   g1_jack <- lapply(1:nrow(full_r), function(i){
     g1 <- sapply(1:nrow(full_r), function(j){
       return(full_r[,vardir][i] * jk[[i]]$result$gamma[j])
@@ -137,7 +140,7 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITE
   })
 
   mse_sample <- mse_FHme_e(formula = formula.a, vardir = vardir, var.x = var.xa,
-                           type.x = type.xa, MAXITER, PRECISION, data = full)
+                           type.x = type.xa, data = full)
   msenonsample <- m1cap + m2cap
   mse_nonsample <- list("mse" = msenonsample)
 
@@ -159,7 +162,7 @@ FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITE
 
   return(result)
 }
-jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", MAXITER, PRECISION, w = rep(1,length(y))) {
+jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", w = rep(1,length(y))) {
   m <- length(y)
   p <- dim(X_cap)[2]
   if(type.x == "witherror"){
@@ -175,9 +178,9 @@ jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", MAXITER, PRECISION,
 
   diff_beta <- as.matrix(rep(1,p))
   diff_sigma <- 1
-  R_sigma <- PRECISION
-  R_beta <- as.matrix(rep(PRECISION,p))
-  max_iter <- MAXITER
+  R_sigma <- 0.0001
+  R_beta <- as.matrix(rep(0.0001,p))
+  max_iter <- 100
   betacap_b <- 0
   sigma2cap_b <- 0
   k <- 0
@@ -333,7 +336,7 @@ jackknife <- function(y,X_cap,psi,c,j, type.x = "witherror", MAXITER, PRECISION,
                  'beta' = betacap_b)
   return(result)
 }
-mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PRECISION, data) {
+mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", data) {
   #namevar <- deparse(substitute(vardir))
   #name_c <- deparse(substitute(c))
   if (type.x != "witherror" & type.x != "noerror" & type.x != "mix")
@@ -468,14 +471,14 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PR
     })
     return(gammacap)
   }
-  beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
+  beta_sigma_conv <- function(y,X_cap,psi,c, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     sigma2cap_b <- 0
     betacap_b <- 0
-    R_sigma <- PRECISION
-    R_beta <- as.matrix(rep(PRECISION,p))
-    max_iter <- MAXITER
+    R_sigma <- 0.0001
+    R_beta <- as.matrix(rep(0.0001,p))
+    max_iter <- 100
     k <- 0
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
@@ -526,7 +529,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PR
     return(beta_sigma)
   }
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c, MAXITER, PRECISION)
+  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c)
   betacap_b <- beta_sigma
   sigma2cap_b <- beta_sigma$sigma2cap
   gcap <- gammacap(y,X_cap,betacap_b,sigma2cap_b,c,psi)
@@ -545,14 +548,14 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PR
   yME <- list("y_me" = yme,
               "gamma" = gcap)
 
-  jackknife <- function(y,X_cap,psi,c,j, MAXITER, PRECISION, w = rep(1,length(y))) {
+  jackknife <- function(y,X_cap,psi,c,j, w = rep(1,length(y))) {
     m <- length(y)
     p <- dim(X_cap)[2]
     diff_beta <- as.matrix(rep(1,p))
     diff_sigma <- 1
-    R_sigma <- PRECISION
-    R_beta <- as.matrix(rep(PRECISION,p))
-    max_iter <- MAXITER
+    R_sigma <- 0.0001
+    R_beta <- as.matrix(rep(0.0001,p))
+    max_iter <- 100
     betacap_b <- 0
     sigma2cap_b <- 0
     k <- 0
@@ -597,7 +600,7 @@ mse_FHme_e <- function(formula, vardir, var.x, type.x = "witherror", MAXITER, PR
                    'beta' = betacap_b)
     return(result)
   }
-  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j, MAXITER, PRECISION))
+  jk <- lapply(1:m, function(j) jackknife(y,X_cap,psi,c,j))
   m1cap <- sapply(1:m, function(i)
   {
     left <- yME$gamma[i]*psi[i]

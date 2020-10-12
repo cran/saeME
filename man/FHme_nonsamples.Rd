@@ -9,7 +9,7 @@ FHme_nonsamples(
   var.x,
   vardir,
   type.x = "witherror",
-  MAXITER = 1000,
+  MAXITER = 100,
   PRECISION = 1e-04,
   n.cluster,
   data
