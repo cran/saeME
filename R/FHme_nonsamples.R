@@ -6,6 +6,7 @@
 #' @param MAXITER maximum number of iterations allowed. Default value is \code{1000} iterations.
 #' @param PRECISION convergence tolerance limit. Default value is \code{0.0001}.
 #' @param type.x type of auxiliary variable used in the model. Either source measured with \code{noerror}, \code{witherror} and \code{mix}. Default value is \code{witherror}.
+#' @param cluster.method the cluster method used. Default value is \code{kmeans} and the other available method is \code{kmedoids}.
 #' @param n.cluster either the number of clusters, say \code{k}, or a set of initial (distinct) cluster centers.
 #' @param data a data frame containing the variables named in formula, vardir, and var.x.
 #' @details A formula has an implied intercept term. To remove this use either y ~ x - 1 or y ~ 0 + x. See \code{\link[stats]{formula}}  for more details of allowed formulae.
@@ -37,19 +38,28 @@
 #' }
 #'
 #' @export FHme_nonsamples
-FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror", MAXITER = 100, PRECISION = 0.0001, n.cluster, data){
+FHme_nonsamples <- function(formula, var.x, vardir, type.x = "witherror",
+                            MAXITER = 100, PRECISION = 0.0001, cluster.method = "kmeans", n.cluster, data){
   formuladata <- model.frame(formula, na.action = NULL, data)
   y <- names(formuladata)[1]
   auxiliary <- formuladata[,-1]
   formula.a <- formula
-  var.xa <- var.x
   vardir <- deparse(substitute(vardir))
-  if(type.x == "witherror"){
+  if(type.x == "noerror"){
     var.xa <- vardir
+    #there is no effect, only for deny an error.
+  } else {
+    var.xa <- var.x
   }
   type.xa <- type.x
+  if (cluster.method != "kmeans" & cluster.method != "kmedoids")
+    stop(" cluster.method=\"", cluster.method, "\" must be \"kmeans\", or \"kmedoids\".")
 
-  get_cluster <- as.matrix(kmeans(auxiliary, n.cluster)$cluster)
+  if(cluster.method == "kmedoids"){
+    get_cluster <- as.matrix(Cluster_Medoids(as.matrix(auxiliary), n.cluster)$clusters)
+  } else {
+    get_cluster <- as.matrix(kmeans(auxiliary, n.cluster)$cluster)
+  }
   data_cluster <- data.frame(data, get_cluster)
   colnames(data_cluster)[ncol(data_cluster)] <- "cluster"
 

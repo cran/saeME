@@ -24,5 +24,6 @@
 #' @importFrom MASS ginv
 #' @import stats
 #' @importFrom dplyr left_join
+#' @importFrom ClusterR Cluster_Medoids
 NULL
 

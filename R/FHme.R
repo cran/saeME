@@ -113,7 +113,7 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", MAXITER = 1000, P
 
     chloe <- wX_capX_cap - wC
     if (det(chloe) != 0) {
-      Q_matrix <- solve(chloe)
+      Q_matrix <- solve(chloe, tol = 1e-20)
       betacap_a <- Q_matrix %*% wX_capy
       betacap <- list("betacap" = betacap_a,
                       "Q_matrix" = Q_matrix)

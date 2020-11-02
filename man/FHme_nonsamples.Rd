@@ -11,6 +11,7 @@ FHme_nonsamples(
   type.x = "witherror",
   MAXITER = 100,
   PRECISION = 1e-04,
+  cluster.method = "kmeans",
   n.cluster,
   data
 )
@@ -27,6 +28,8 @@ FHme_nonsamples(
 \item{MAXITER}{maximum number of iterations allowed. Default value is \code{1000} iterations.}
 
 \item{PRECISION}{convergence tolerance limit. Default value is \code{0.0001}.}
+
+\item{cluster.method}{the cluster method used. Default value is \code{kmeans} and the other available method is \code{kmedoids}.}
 
 \item{n.cluster}{either the number of clusters, say \code{k}, or a set of initial (distinct) cluster centers.}
 
