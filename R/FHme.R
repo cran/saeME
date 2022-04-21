@@ -83,196 +83,164 @@ FHme <- function(formula, vardir, var.x, type.x = "witherror", MAXITER = 1000, P
   if (length(na.action(c))){
     stop("your mse.x contains NA values.")
   }
+  w = rep(1,length(y))
+  m <- length(y)
+  p <- dim(X_cap)[2]
+  sigma2cap <- 0
+  betacap <- 0
+  R_sigma <- PRECISION
+  R_beta <- as.matrix(rep(PRECISION,p))
+  max_iter <- MAXITER
+  k <- 0
+  diff_beta <- as.matrix(rep(1,p))
+  diff_sigma <- 1
+  convergence <- TRUE
 
-  betacap <- function(y,X_cap,c,w) {
-    m <- length(y)
-    p <- dim(X_cap)[2]
+  #iteration for estimated beta and sigma
+  while(((any(diff_beta > R_beta)) | (diff_sigma > R_sigma)) & (k < max_iter)){
+      betacap_tmp <- betacap
+      sigma2cap_tmp <- sigma2cap
+      if(all(diff_beta < R_beta)){ #when beta still didnt converge, but sigma was done
+        mp <- 1/(m-p)
+        point <- sum(sapply(1:m, function(i){
+          X_cap_i <- as.matrix(X_cap[i,])
+          point <- (y[i] - t(X_cap_i)%*%betacap)^2 - psi[i] - t(betacap)%*%diag(c[i,],nrow = p)%*%betacap
+          return(point)}))
+        sigma2cap <- mp*point
 
-    wX_capy <- Reduce('+', lapply(1:m, function(i)
-    {
-      X_cap_i <- as.matrix(X_cap[i,])
-      wX_capy <- w[i]*X_cap_i*y[i]
-      return(wX_capy)
-    }))
-
-    wX_capX_cap <- Reduce('+', lapply(1:m, function(i)
-    {
-      X_cap_i <- as.matrix(X_cap[i,])
-      wX_capX_cap <- w[i]*(X_cap_i%*%t(X_cap_i))
-      return(wX_capX_cap)
-    }))
-
-    wC <- Reduce('+', lapply(1:m, function(i)
-    {
-      C <- diag(c[i,],nrow = p)
-      wC_i <- w[i]*C
-      return(wC_i)
-    }))
-
-    betacap <- 0
-
-    chloe <- wX_capX_cap - wC
-    if (det(chloe) != 0) {
-      Q_matrix <- solve(chloe, tol = 1e-20)
-      betacap_a <- Q_matrix %*% wX_capy
-      betacap <- list("betacap" = betacap_a,
-                      "Q_matrix" = Q_matrix)
-
-    }else{
-      G <- wX_capX_cap
-      Gsqrt <- sqrtm(G)
-
-      if(sum(eigen(G)$value > 0) == p)
-      {
-        invG <- solve(Gsqrt)
-
-      }else{
-        invG <- ginv(Gsqrt)
-      }
-      eigenGwCG <- eigen(invG%*%wC%*%invG)
-      pOrth <- eigenGwCG$vector
-      lDiag <- diag(eigenGwCG$values, nrow = p)
-      D <- diag(sapply(1:p, function(j)
-      {
-        Djj <- 0
-        if (1-lDiag[j,j] > 1/m)
-          Djj <- 1/(1-lDiag[j,j])
-
-        return(Djj)
-      }), nrow = p)
-      Q1_matrix <- invG%*%pOrth%*%D%*%t(pOrth)%*%invG
-      betacap_a <- Q1_matrix%*%wX_capy
-      betacap <- list("betacap" = betacap_a,
-                      "Q_matrix" = Q1_matrix)
-    }
-
-    return(betacap)
-  }
-  sigma2cap <- function(y,X_cap,c,betacap_i,psi) {
-    m <- length(y)
-    betacap <- betacap_i
-    p <- dim(X_cap)[2]
-
-    pengali <- 1/(m-p)
-    poin <- sum(sapply(1:m, function(i)
-    {
-      X_cap_i <- as.matrix(X_cap[i,])
-      poin <- (y[i] - t(X_cap_i)%*%betacap)^2 - psi[i] - t(betacap)%*%diag(c[i,],nrow = p)%*%betacap
-      return(poin)
-    }))
-    sigma2cap <- pengali*poin
-    #Ybarra & Lohr 2008: if estimated random effect < 0 set to zero
-    if(sigma2cap < 0) {
-      sigma2cap <- 0
-    }
-
-    return(sigma2cap)
-  }
-  beta_sigma_conv <- function(y,X_cap,psi,c, MAXITER, PRECISION, w = rep(1,length(y))) {
-    m <- length(y)
-    p <- dim(X_cap)[2]
-    sigma2cap_b <- 0
-    betacap_b <- 0
-    R_sigma <- PRECISION
-    R_beta <- as.matrix(rep(PRECISION,p))
-    max_iter <- MAXITER
-    k <- 0
-    diff_beta <- as.matrix(rep(1,p))
-    diff_sigma <- 1
-    convergence <- TRUE
-
-    while(((any(diff_beta > R_beta)) | (diff_sigma > R_sigma)) & (k < max_iter)){
-      betacap_a <- betacap_b
-      sigma2cap_a <- sigma2cap_b
-      if(all(diff_beta < R_beta)){
-        sigma2cap_b <- sigma2cap(y,X_cap,c,betacap_b,psi)
+        #Ybarra & Lohr 2008: if estimated random effect < 0 set to zero
+        if(sigma2cap < 0) {
+          sigma2cap <- 0}
         w <- sapply(1:m, function(i){
-          wi <- 1/(sigma2cap_b + psi[i] + t(betacap_b)%*%diag(c[i,],nrow = p)%*%betacap_b)
+          wi <- 1/(sigma2cap + psi[i] + t(betacap)%*%diag(c[i,],nrow = p)%*%betacap)
           return(wi)
         })
-        diff_sigma <- sigma2cap_b - sigma2cap_a
+        diff_sigma <- sigma2cap - sigma2cap_tmp
 
-      } else if(diff_sigma < R_sigma){
-        betacap_b <- betacap(y,X_cap,c,w)$betacap
-        Q_matrix <- betacap(y, X_cap, c, w)$Q_matrix
+      } else if(diff_sigma < R_sigma){ #when sigma still didnt converge, but beta was done
+        wC <- Reduce('+', lapply(1:m, function(i){
+          C <- diag(c[i,],nrow = p)
+          wC_i <- w[i]*C
+          return(wC_i)}))
+        Xtwi <- t(w * X_cap)
+        chloe <- Xtwi %*% X_cap - wC
+        QR.fac <- qr(chloe)
+
+        if (QR.fac$rank == p) {
+          Q_matrix <- solve(chloe)
+          betacap <- Q_matrix %*% Xtwi %*% y
+
+        }else{
+          G <- Xtwi %*% X_cap
+          Gsqrt <- qr.R(qr(sqrt(w) * X_cap))
+          if(sum(eigen(G)$value > 0) == p){
+            invG <- backsolve(Gsqrt, diag(p))
+          } else {
+            invG <- ginv(Gsqrt)
+          }
+          eigenGwCG <- eigen(invG%*%wC%*%invG)
+          pOrth <- eigenGwCG$vector
+          lDiag <- diag(eigenGwCG$values, nrow = p)
+          D <- diag(sapply(1:p, function(j)
+          {
+            Djj <- 0
+            if (1-lDiag[j,j] > 1/m)
+              Djj <- 1/(1-lDiag[j,j])
+            return(Djj)
+          }), nrow = p)
+          Q_matrix <- invG %*% crossprod(sqrt(D), pOrth) %*% invG
+          betacap <- Q_matrix %*% Xtwi %*% y
+        }
+
         w <- sapply(1:m, function(i){
-          wi <- 1/(sigma2cap_b + psi[i] + t(betacap_b)%*%diag(c[i,],nrow = p)%*%betacap_b)
+          wi <- 1/(sigma2cap + psi[i] + t(betacap)%*%diag(c[i,],nrow = p)%*%betacap)
           return(wi)
         })
-        diff_beta <- betacap_b - betacap_a
+        diff_beta <- betacap - betacap_tmp
 
-      } else {
-        betacap_b <- betacap(y,X_cap,c,w)$betacap
-        Q_matrix <- betacap(y, X_cap, c, w)$Q_matrix
-        sigma2cap_b <- sigma2cap(y,X_cap,c,betacap_b,psi)
+      } else { #when beta and sigma didnt converge
+        wC <- Reduce('+', lapply(1:m, function(i){
+          C <- diag(c[i,],nrow = p)
+          wC_i <- w[i]*C
+          return(wC_i)}))
+        Xtwi <- t(w * X_cap)
+        chloe <- Xtwi %*% X_cap - wC
+        QR.fac <- qr(chloe)
+
+        if (QR.fac$rank == p) {
+          Q_matrix <- solve(chloe)
+          betacap <- Q_matrix %*% Xtwi %*% y
+
+        }else{
+          G <- Xtwi %*% X_cap
+          Gsqrt <- qr.R(qr(sqrt(w) * X_cap))
+          if(sum(eigen(G)$value > 0) == p){
+            invG <- backsolve(Gsqrt, diag(p))
+          } else {
+            invG <- ginv(Gsqrt)
+          }
+          eigenGwCG <- eigen(invG%*%wC%*%invG)
+          pOrth <- eigenGwCG$vector
+          lDiag <- diag(eigenGwCG$values, nrow = p)
+          D <- diag(sapply(1:p, function(j)
+          {
+            Djj <- 0
+            if (1-lDiag[j,j] > 1/m)
+              Djj <- 1/(1-lDiag[j,j])
+            return(Djj)
+          }), nrow = p)
+          Q_matrix <- invG %*% crossprod(sqrt(D), pOrth) %*% invG
+          betacap <- Q_matrix %*% Xtwi %*% y
+        }
+        mp <- 1/(m-p)
+        point <- sum(sapply(1:m, function(i){
+          X_cap_i <- as.matrix(X_cap[i,])
+          point <- (y[i] - t(X_cap_i)%*%betacap)^2 - psi[i] - t(betacap)%*%diag(c[i,],nrow = p)%*%betacap
+          return(point)}))
+        sigma2cap <- mp*point
+
+        #Ybarra & Lohr 2008: if estimated random effect < 0 set to zero
+        if(sigma2cap < 0) {
+          sigma2cap <- 0}
         w <- sapply(1:m, function(i){
-          wi <- 1/(sigma2cap_b + psi[i] + t(betacap_b)%*%diag(c[i,],nrow = p)%*%betacap_b)
+          wi <- 1/(sigma2cap + psi[i] + t(betacap)%*%diag(c[i,],nrow = p)%*%betacap)
           return(wi)
         })
-        diff_beta <- betacap_b - betacap_a
-        diff_sigma <- sigma2cap_b - sigma2cap_a
+        diff_beta <- betacap - betacap_tmp
+        diff_sigma <- sigma2cap - sigma2cap_tmp
       }
       k <- k+1
-
     }
-    if (k >= max_iter & ((any(diff_beta > R_beta)) | (diff_sigma > R_sigma))) {
-      convergence <- FALSE
-    }
-    beta_sigma <- list('betacap'= betacap_b,
-                       'sigma2cap'= sigma2cap_b,
-                       "Q_matrix" = Q_matrix,
-                       "convergence" = convergence,
-                       "iterations" = k)
-    return(beta_sigma)
-  }
-  gammacap <- function(y,X_cap,betacap_i,sigma2cap,c,psi) {
-    m <- length(y)
-    p <- dim(X_cap)[2]
-    betacap <- betacap_i$betacap
-    gammacap <- sapply(1:m, function(i)
-    {
-      mse_ri <- sigma2cap + t(betacap)%*%diag(c[i,],nrow = p)%*%betacap
-      return(mse_ri/(mse_ri + psi[i]))
-    })
-    return(gammacap)
-  }
-  y_me <- function(y,X_cap,betacap_i,gammacap) {
-    m <- length(y)
-    betacap <- betacap_i$betacap
-    yme <- sapply(1:m, function(i){
-      yme <- gammacap[i]*y[i] + (1-gammacap[i])*t(as.matrix(X_cap[i,]))%*%betacap
-      return(yme)
-    })
-    return(yme)
-  }
+  if (k >= max_iter & ((any(diff_beta > R_beta)) | (diff_sigma > R_sigma))) {
+    convergence <- FALSE}
 
-  beta_sigma <- beta_sigma_conv(y,X_cap,psi,c, MAXITER, PRECISION)
-  se.b <- sqrt(diag(beta_sigma$Q_matrix))
-  betacap_b <- beta_sigma
-  t.val <- betacap_b$betacap/se.b
+  gammacap <- sapply(1:m, function(i){
+    mse_ri <- sigma2cap + t(betacap)%*%diag(c[i,],nrow = p)%*%betacap
+    return(mse_ri/(mse_ri + psi[i]))})
+
+  X.beta <- X_cap %*% betacap
+  yme <- gammacap*y + (1-gammacap)*X.beta
+
+  se.b <- sqrt(diag(Q_matrix))
+  t.val <- betacap/se.b
   pv <- 2 * pnorm(abs(t.val), lower.tail = FALSE)
-  coef <- data.frame(betacap_b$betacap, se.b, t.val, pv)
+  coef <- data.frame(betacap, se.b, t.val, pv)
   colnames(coef) <- c("beta", "std.error", "t.statistics", "p.value")
-  sigma2cap_b <- beta_sigma$sigma2cap
-
-  gcap <- gammacap(y,X_cap,betacap_b,sigma2cap_b,c,psi)
-  yme <- y_me(y,X_cap,betacap_b,gcap)
   result <- list(eblup = NA, fit = list(method = NA, convergence = NA,
-                                       iterations = NA,
-                                       estcoef =NA,
-                                       refvar = NA,
-                                       gamma = NA))
+                                        iterations = NA,
+                                        estcoef =NA,
+                                        refvar = NA,
+                                        gamma = NA))
   result$eblup <- yme
   result$fit$method <- 'REML'
-  result$fit$convergence <- beta_sigma$convergence
+  result$fit$convergence <- convergence
   if (result$fit$convergence == FALSE) {
     warning("The fitting method does not converge.\n")
   }
-  result$fit$iterations <- beta_sigma$iterations
+  result$fit$iterations <- k
   result$fit$estcoef <- coef
-  result$fit$refvar <- sigma2cap_b
-  result$fit$gamma <- gcap
-
+  result$fit$refvar <- sigma2cap
+  result$fit$gamma <- gammacap
   return(result)
 }
 

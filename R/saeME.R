@@ -14,16 +14,12 @@
 #' \describe{
 #'     \item{\code{\link{FHme}}}{Gives the EBLUP for each domain based on Fay-Herriot with measurement error model.}
 #'     \item{\code{\link{mse_FHme}}}{Gives the MSE for each domain using the jackknife method.}
-#'     \item{\code{\link{FHme_nonsamples}}}{Gives the EBLUP for each non-sample area based on Fay-Herriot with measurement error model.}
 #'     }
 #'
 #' @references Ybarra, L.M. and Lohr, S. L. (2008). Small area estimation when auxiliary information is measured with error. Biometrika 95, 919-931.
 #' @docType package
 #' @name saeME
-#' @importFrom expm sqrtm
 #' @importFrom MASS ginv
 #' @import stats
-#' @importFrom dplyr left_join
-#' @importFrom ClusterR Cluster_Medoids
 NULL
 
