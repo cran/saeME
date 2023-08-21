@@ -1,10 +1,10 @@
-4c9f8863bbdaabd1fb093ca9ad0a396d *DESCRIPTION
+1aef5a425c140e1ac6cb84f6d91202f0 *DESCRIPTION
 403ea55d5b82177225d0f233defc3c96 *NAMESPACE
 86da38bc572e4e429a36188dadd6fe8e *R/FHme.R
 89efde2cabb1bea2498c5925da6d8080 *R/dataME.R
 97b5c57de701eff21b9e889843953835 *R/datamix.R
 fa7b00ae5cc4afc60b636bb244f11440 *R/mse_FHme.R
-d77270ed78a730e8a7f9728d548f6559 *R/saeME.R
+8d90c6a26cf8c9e42beb2bd6af26ce97 *R/saeME.R
 1e8efe0caadc5aa9ece09d83435f8a31 *README.md
 10bfa61852d7d0adec2c5c9f80706653 *data/dataME.rda
 739ecd95bada0309f1d288f4acc94910 *data/datamix.rda
@@ -12,4 +12,4 @@ d5e808fd4ef5f7df0370e73518be3cab *man/FHme.Rd
 43d6bcbd55d26fb36391067169e4c5c0 *man/dataME.Rd
 a9b29e1206dadc26a349149eb35d2ce8 *man/datamix.Rd
 54fa83288aa41a351ea7097a07448388 *man/mse_FHme.Rd
-93bde71fab911b00f17721f442a4551c *man/saeME.Rd
+902a0341a9373a8ffe966393a539edda *man/saeME-package.Rd

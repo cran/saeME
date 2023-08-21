@@ -17,9 +17,8 @@
 #'     }
 #'
 #' @references Ybarra, L.M. and Lohr, S. L. (2008). Small area estimation when auxiliary information is measured with error. Biometrika 95, 919-931.
-#' @docType package
-#' @name saeME
 #' @importFrom MASS ginv
 #' @import stats
-NULL
+"_PACKAGE"
+
 
